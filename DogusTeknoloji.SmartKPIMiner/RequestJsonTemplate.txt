@@ -1,0 +1,84 @@
+﻿{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "~@GreaterThanOrEqual@~",
+              "lte": "~@LowerThanOrEqual@~",
+              "format": "epoch_millis"
+            }
+          }
+        },
+        {
+          "query_string": {
+            "analyze_wildcard": true,
+            "query": "*"
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "allData": {
+      "terms": {
+        "field": "host.keyword",
+        "size": 500,
+        "order": {
+          "_term": "desc"
+        },
+        "min_doc_count": 1
+      },
+      "aggs": {
+        "hostname": {
+          "terms": {
+            "field": "application.keyword",
+            "size": 10,
+            "order": {
+              "_term": "desc"
+            },
+            "min_doc_count": 1
+          },
+          "aggs": {
+            "Sitename": {
+              "terms": {
+                "field": "page.keyword",
+                "size": 10,
+                "order": {
+                  "_term": "desc"
+                },
+                "min_doc_count": 1
+              },
+              "aggs": {
+                "urlName": {
+                  "terms": {
+                    "field": "http_response.keyword",
+                    "size": 500,
+                    "order": {
+                      "_term": "desc"
+                    },
+                    "min_doc_count": 1
+                  },
+                  "aggs": {
+                    "MaxTime": {
+                      "max": {
+                        "field": "time_taken"
+                      }
+                    },
+                    "Avaragetime": {
+                      "avg": {
+                        "field": "time_taken"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
