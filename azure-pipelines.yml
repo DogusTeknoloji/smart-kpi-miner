@@ -1,7 +1,7 @@
 trigger:
 - master
 
-pool: 'Default'
+pool: 'WindowsPool'
 
 steps:
 - task: replacetokens@3
