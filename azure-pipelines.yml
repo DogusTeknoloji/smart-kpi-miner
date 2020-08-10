@@ -1,8 +1,7 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'WindowsPool'
+pool: 'Default'
 
 steps:
 - task: replacetokens@3
