@@ -1,14 +1,13 @@
 trigger:
 - master
 
-pool: 
-  vmImage: windows-latest
+pool: 'Default'
 
 steps:
 - task: replacetokens@3
   displayName: Replace Variables
   inputs:
-    targetFiles: '**/appsettings.config'
+    targetFiles: '**/appsettings.json'
     encoding: 'auto'
     writeBOM: true
     actionOnMissing: 'warn'
@@ -18,12 +17,13 @@ steps:
     useLegacyPattern: false
     enableTelemetry: true
 
+
 - task: DotNetCoreCLI@2
   displayName: Publish Agent for Windows x64
   inputs:
     command: 'publish'
     publishWebProjects: false
-    projects: 'DogusTeknoloji.SmartKPIMiner.Agent.csproj'
+    projects: '**/DogusTeknoloji.SmartKPIMiner.Agent.csproj'
     arguments: '-c Release -r win-x64'
     zipAfterPublish: false
 
