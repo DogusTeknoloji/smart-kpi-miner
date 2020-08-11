@@ -1,0 +1,35 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: replacetokens@3
+  displayName: Replace Variables
+  inputs:
+    targetFiles: '**/appsettings.json'
+    encoding: 'auto'
+    writeBOM: true
+    actionOnMissing: 'warn'
+    keepToken: false
+    tokenPrefix: '#{'
+    tokenSuffix: '}#'
+    useLegacyPattern: false
+    enableTelemetry: true
+
+- task: DotNetCoreCLI@2
+  displayName: Take release for Windows x64
+  inputs:
+    command: 'publish'
+    publishWebProjects: false
+    projects: '**/DogusTeknoloji.SmartKPIMiner.Agent.csproj'
+    arguments: '-c Release -r win-x64 -o $(Build.ArtifactStagingDirectory)'
+    zipAfterPublish: false
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish Build Artifact
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'SmartKPI-Agent'
+    publishLocation: 'Container'

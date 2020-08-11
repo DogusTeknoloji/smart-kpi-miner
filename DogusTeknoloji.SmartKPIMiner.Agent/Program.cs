@@ -1,4 +1,5 @@
-﻿namespace DogusTeknoloji.SmartKPIMiner.Agent
+using System.ServiceProcess;
+namespace DogusTeknoloji.SmartKPIMiner.Agent
 {
     public static class Program
     {
