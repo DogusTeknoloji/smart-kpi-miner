@@ -11,9 +11,9 @@ namespace DogusTeknoloji.SmartKPIMiner.Model.ElasticSearch
         public int HttpResponseCode { get; set; }
         [JsonProperty("doc_count")]
         public int DocumentCount { get; set; }
-        [JsonProperty("Avaragetime.value")]
+        [JsonProperty("averagetime.value")]
         public double AverageResponseTime { get; set; }
-        [JsonProperty("MaxTime.value")]
+        [JsonProperty("maxtime.value")]
         public double MaxResponseTime { get; set; }
     }
 }

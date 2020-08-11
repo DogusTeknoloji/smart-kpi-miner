@@ -15,7 +15,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Model.ElasticSearch
         public Shards Shards { get; set; }
         [JsonProperty("hits")]
         public Hits Hits { get; set; }
-        [JsonProperty("aggregations.allData")]
+        [JsonProperty("aggregations.alldata")]
         public Aggregation Aggregation { get; set; }
     }
 }

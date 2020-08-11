@@ -10,7 +10,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Model.ElasticSearch
     {
         [JsonProperty("key")]
         public string SiteName { get; set; }
-        [JsonProperty("Sitename.buckets")]
+        [JsonProperty("sitename.buckets")]
         public IList<AggregationItem> Urls { get; set; }
     }
 }

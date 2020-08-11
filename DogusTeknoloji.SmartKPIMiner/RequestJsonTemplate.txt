@@ -22,10 +22,10 @@
     }
   },
   "aggs": {
-    "allData": {
+    "alldata": {
       "terms": {
         "field": "host.keyword",
-        "size": 500,
+        "size": 25,
         "order": {
           "_term": "desc"
         },
@@ -35,39 +35,39 @@
         "hostname": {
           "terms": {
             "field": "application.keyword",
-            "size": 10,
+            "size": 200,
             "order": {
               "_term": "desc"
             },
             "min_doc_count": 1
           },
           "aggs": {
-            "Sitename": {
+            "sitename": {
               "terms": {
                 "field": "page.keyword",
-                "size": 10,
+                "size": 400,
                 "order": {
                   "_term": "desc"
                 },
                 "min_doc_count": 1
               },
               "aggs": {
-                "urlName": {
+                "urlname": {
                   "terms": {
                     "field": "http_response.keyword",
-                    "size": 500,
+                    "size": 10,
                     "order": {
                       "_term": "desc"
                     },
                     "min_doc_count": 1
                   },
                   "aggs": {
-                    "MaxTime": {
+                    "maxtime": {
                       "max": {
                         "field": "time_taken"
                       }
                     },
-                    "Avaragetime": {
+                    "averagetime": {
                       "avg": {
                         "field": "time_taken"
                       }
