@@ -1,5 +1,6 @@
 ﻿using DogusTeknoloji.SmartKPIMiner.Model.Database;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace DogusTeknoloji.SmartKPIMiner.Data
 {
@@ -13,6 +14,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Data
         public SmartKPIDbContext(string connectionString) : base()
         {
             this._connectionString = connectionString;
+            this.Database.SetCommandTimeout(timeout: TimeSpan.FromMinutes(3));
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
