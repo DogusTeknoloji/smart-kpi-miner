@@ -44,7 +44,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
                 {
                     newSearchRange = newSearchRange.AddMinutes(CommonFunctions.UnifyingConstant);
 
-                    string jsonbody = ElasticSearchRESTAdapter.GetRequestBody(searchRange);
+                    string jsonbody = ElasticSearchRESTAdapter.GetRequestBody(newSearchRange);
                     Root responseRoot = await ElasticSearchRESTAdapter.GetResponseFromElasticUrlAsync(index.UrlAddress, index.IndexName, jsonbody);
                     List<AggregationItem> aggregationItems = responseRoot.Aggregation?.GetAsAggregationItems();
                     if (aggregationItems != null)
