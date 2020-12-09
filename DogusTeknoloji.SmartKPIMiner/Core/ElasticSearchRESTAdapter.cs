@@ -28,6 +28,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Core
             request.Method = "POST";
             request.ContentType = "application/json";
             request.ContentLength = requestBody.Length;
+            request.Timeout = (int)TimeSpan.FromMinutes(3).TotalMilliseconds;
 
             using (StreamWriter requestWriter = new StreamWriter(request.GetRequestStream(), Encoding.ASCII))
             {
