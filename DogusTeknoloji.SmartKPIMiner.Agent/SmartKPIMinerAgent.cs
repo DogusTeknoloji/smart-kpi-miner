@@ -45,7 +45,11 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
                     newSearchRange = newSearchRange.AddMinutes(CommonFunctions.UnifyingConstant);
 
                     string jsonbody = ElasticSearchRESTAdapter.GetRequestBody(newSearchRange);
-                    Root responseRoot = await ElasticSearchRESTAdapter.GetResponseFromElasticUrlAsync(index.UrlAddress, index.IndexName, jsonbody);
+
+                    // Combine Index Name with pattern ->  index-* || index-2020.01.01 | index-keyword etc...
+                    string fullIndexName = ElasticSearchRESTAdapter.GetFullIndexName(index.IndexName, index.IndexPattern, newSearchRange);
+
+                    Root responseRoot = await ElasticSearchRESTAdapter.GetResponseFromElasticUrlAsync(index.UrlAddress, fullIndexName, jsonbody);
                     List<AggregationItem> aggregationItems = responseRoot.Aggregation?.GetAsAggregationItems();
                     if (aggregationItems != null)
                     {

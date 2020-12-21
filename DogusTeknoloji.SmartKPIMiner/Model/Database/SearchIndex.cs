@@ -18,6 +18,11 @@ namespace DogusTeknoloji.SmartKPIMiner.Model.Database
         public string IndexName { get; set; }
 
         [Required]
+        [MaxLength(length: 50 , ErrorMessage = "Greater than 50 characters is not allowed")]
+        [Column(TypeName = "varchar(50)")]
+        public string IndexPattern { get; set; }
+
+        [Required]
         [MaxLength(length: 250, ErrorMessage = "Greater than 250 characters is not alllowed")]
         [Column(TypeName = "varchar(250)")]
         public string UrlAddress { get; set; }

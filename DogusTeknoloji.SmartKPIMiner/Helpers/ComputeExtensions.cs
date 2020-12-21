@@ -1,11 +1,10 @@
 ﻿using DogusTeknoloji.SmartKPIMiner.Core;
 using DogusTeknoloji.SmartKPIMiner.Model.ElasticSearch;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace DogusTeknoloji.SmartKPIMiner.Helpers
 {
@@ -122,6 +121,15 @@ namespace DogusTeknoloji.SmartKPIMiner.Helpers
             if (!isParseSuccess) { return true; }
             if (excludedFileFormats.Contains(lastPartOfUrl.ToLowerInvariant())) { return false; }
             return true;
+        }
+        public static bool ValidateDateFormat(this string customFormat)
+        {
+            char[] reservedChars = new char[] { 'F', 'H', 'K', 'M', 'd', 'f', 'g', 'h', 'm', 's', 't', 'y', 'z', '%', ':', '/', '"', '\'', '\\', '-', '.' };
+
+            return !string.IsNullOrWhiteSpace(customFormat)
+                        && customFormat.Length > 1
+                        && (DateTimeFormatInfo.CurrentInfo.GetAllDateTimePatterns().Contains(customFormat)
+                            || customFormat.ToCharArray().All(c => reservedChars.Contains(c)));
         }
     }
 }
