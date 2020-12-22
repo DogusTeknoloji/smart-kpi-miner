@@ -35,7 +35,16 @@ namespace DogusTeknoloji.SmartKPIMiner.Core
                 requestWriter.Write(requestBody);
             }
 
-            WebResponse response = request.GetResponse();
+            HttpWebResponse response = null;
+            try
+            {
+                response = (HttpWebResponse)request.GetResponse();
+            }
+            catch (WebException ex)
+            {
+                return null;
+            }
+
             Stream incomingStream = response.GetResponseStream();
             using (StreamReader responseReader = new StreamReader(incomingStream))
             {
@@ -45,6 +54,29 @@ namespace DogusTeknoloji.SmartKPIMiner.Core
             }
         }
 
+
+        public static string GetFullIndexName(string index, string indexPattern, DateTime? indexPatternValue)
+        {
+            string result;
+
+            //Prevent multiple call of ValidateDateFormat() method
+            bool validateFormatResult = indexPattern.ValidateDateFormat();
+
+            if (!validateFormatResult)
+            {
+                result = index + "-" + indexPattern;
+            }
+            else if (validateFormatResult && indexPatternValue.HasValue)
+            {
+                result = index + "-" + indexPatternValue.Value.ToString(indexPattern);
+            }
+            else
+            {
+                result = index + "-*";
+            }
+
+            return result;
+        }
         public static string GetRequestBody(DateTime? start)
         {
             if (start == null) return null;

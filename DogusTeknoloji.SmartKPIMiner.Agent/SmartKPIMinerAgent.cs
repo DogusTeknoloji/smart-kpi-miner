@@ -45,7 +45,25 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
                     newSearchRange = newSearchRange.AddMinutes(CommonFunctions.UnifyingConstant);
 
                     string jsonbody = ElasticSearchRESTAdapter.GetRequestBody(newSearchRange);
-                    Root responseRoot = await ElasticSearchRESTAdapter.GetResponseFromElasticUrlAsync(index.UrlAddress, index.IndexName, jsonbody);
+
+                    // Combine Index Name with pattern ->  index-* || index-2020.01.01 | index-keyword etc...
+                    string fullIndexName = ElasticSearchRESTAdapter.GetFullIndexName(index.IndexName, index.IndexPattern, newSearchRange);
+
+                    Root responseRoot = await ElasticSearchRESTAdapter.GetResponseFromElasticUrlAsync(index.UrlAddress, fullIndexName, jsonbody);
+                    if (responseRoot == null)
+                    {
+                        if ((DateTime.Now - newSearchRange.AddDays(1)).TotalMilliseconds < 0)
+                        {
+                            Console.WriteLine($"{index.UrlAddress}->{index.IndexName} has no data, index skipped.");
+                            break;
+                        }
+
+                        newSearchRange = newSearchRange.AddDays(1);
+                        i += (24 * 60 / CommonFunctions.UnifyingConstant) - 1;
+                        Console.WriteLine($"{index.UrlAddress}->{index.IndexName} is expired, skipped to [{i + 1}/{count}].");
+                        continue;
+                    }
+
                     List<AggregationItem> aggregationItems = responseRoot.Aggregation?.GetAsAggregationItems();
                     if (aggregationItems != null)
                     {

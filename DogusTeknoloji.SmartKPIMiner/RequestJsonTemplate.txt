@@ -25,7 +25,7 @@
     "alldata": {
       "terms": {
         "field": "host.keyword",
-        "size": 25,
+        "size": 100,
         "order": {
           "_term": "desc"
         },
@@ -35,7 +35,7 @@
         "hostname": {
           "terms": {
             "field": "application.keyword",
-            "size": 200,
+            "size": 1000,
             "order": {
               "_term": "desc"
             },
@@ -45,7 +45,7 @@
             "sitename": {
               "terms": {
                 "field": "page.keyword",
-                "size": 400,
+                "size": 2000,
                 "order": {
                   "_term": "desc"
                 },
