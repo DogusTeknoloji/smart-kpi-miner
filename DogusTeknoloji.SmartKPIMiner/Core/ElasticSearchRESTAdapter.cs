@@ -35,7 +35,16 @@ namespace DogusTeknoloji.SmartKPIMiner.Core
                 requestWriter.Write(requestBody);
             }
 
-            WebResponse response = request.GetResponse();
+            HttpWebResponse response = null;
+            try
+            {
+                response = (HttpWebResponse)request.GetResponse();
+            }
+            catch (WebException ex)
+            {
+                return null;
+            }
+
             Stream incomingStream = response.GetResponseStream();
             using (StreamReader responseReader = new StreamReader(incomingStream))
             {
