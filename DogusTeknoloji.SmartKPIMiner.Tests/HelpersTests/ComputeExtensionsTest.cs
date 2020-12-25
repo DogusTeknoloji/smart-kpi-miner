@@ -87,8 +87,9 @@ namespace DogusTeknoloji.SmartKPIMiner.Tests.HelpersTests
         [TestCategory("Unit-Test")]
         public void CHECK_IS_FORMAT_INCLUDED_RETURNS_FALSE_WHEN_URL_HAS_FILE_FORMAT()
         {
+            List<string> excludedFormats = new List<string> { "bmp", "jpg", "png" };
             string mockStr = "http://mock.url/image.jpg";
-            bool result = mockStr.CheckIsFormatIncluded();
+            bool result = mockStr.CheckIsFormatIncluded(excludedFormats);
             bool expected = false;
 
             Assert.AreEqual(expected, result);
@@ -98,8 +99,9 @@ namespace DogusTeknoloji.SmartKPIMiner.Tests.HelpersTests
         [TestCategory("Unit-Test")]
         public void CHECK_IS_FORMAT_INCLUDED_RETURNS_TRUE_WHEN_URL_HAS_NOT_FILE_FORMAT()
         {
+            List<string> excludedFormats = new List<string> { "bmp", "jpg", "png" };
             string mockStr = "http://mock.url/path";
-            bool result = mockStr.CheckIsFormatIncluded();
+            bool result = mockStr.CheckIsFormatIncluded(excludedFormats);
             bool expected = true;
 
             Assert.AreEqual(expected, result);

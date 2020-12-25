@@ -123,6 +123,18 @@ namespace DogusTeknoloji.SmartKPIMiner.Helpers
             if (excludedFileFormats.Contains(lastPartOfUrl.ToLowerInvariant())) { return false; }
             return true;
         }
+
+        public static bool CheckIsFormatIncluded(this string url,List<string> excludedFileFormats)
+        {
+            if (string.IsNullOrEmpty(url)) { return true; }
+
+            bool isParseSuccess = url.SplitAndGetLastPartOfString('/', out string lastPartOfUrl);
+            if (!isParseSuccess) { return true; }
+            isParseSuccess = lastPartOfUrl.SplitAndGetLastPartOfString('.', out lastPartOfUrl);
+            if (!isParseSuccess) { return true; }
+            if (excludedFileFormats.Contains(lastPartOfUrl.ToLowerInvariant())) { return false; }
+            return true;
+        }
         public static bool ValidateDateFormat(this string customFormat)
         {
             char[] reservedChars = new char[] { 'F', 'H', 'K', 'M', 'd', 'f', 'g', 'h', 'm', 's', 't', 'y', 'z', '%', ':', '/', '"', '\'', '\\', '-', '.' };
