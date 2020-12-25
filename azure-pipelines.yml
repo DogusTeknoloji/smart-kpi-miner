@@ -5,6 +5,7 @@ pool: 'WindowsPool'
 
 variables:
   solution: '**/DogusTeknoloji.SmartKPIMiner.Agent.csproj'
+  testSolution: '**/DogusTeknoloji.SmartKPIMiner.Tests.csproj'
   runtime: 'win-x64'
   configuration: 'Release'
 
@@ -40,7 +41,7 @@ steps:
   displayName: 'Run Unit Tests'
   inputs:
     command: 'test'
-    projects: '$(solution)'
+    projects: '$(testSolution)'
     testRunTitle: 'Generic Unit Tests'
 
 - task: DotNetCoreCLI@2
