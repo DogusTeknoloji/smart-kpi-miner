@@ -57,10 +57,13 @@ namespace DogusTeknoloji.SmartKPIMiner.Core
 
         public static string GetFullIndexName(string index, string indexPattern, DateTime? indexPatternValue)
         {
+            if (index == null | indexPattern == null) { return null; }
+
             string result;
 
             //Prevent multiple call of ValidateDateFormat() method
             bool validateFormatResult = indexPattern.ValidateDateFormat();
+            if (validateFormatResult && !indexPatternValue.HasValue) { return null; }
 
             if (!validateFormatResult)
             {
@@ -88,7 +91,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Core
 
         public static string GetRequestBody(DateTime? start, DateTime? end)
         {
-            if (start == null || end == null) { return null; }
+            if (start == null || end == null || end < start) { return null; }
 
             long startMilliSec = CommonFunctions.GetCurrentUnixTimestampMillisec(start.Value);
             long endMilliSec = CommonFunctions.GetCurrentUnixTimestampMillisec(end.Value);

@@ -12,7 +12,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Tests.Mocks.ElasticSearch
                 AverageResponseTime = RandomNumberGenerator.GetRandomDouble(),
                 DocumentCount = RandomNumberGenerator.GetRandomInt(),
                 HttpResponseCode = RandomNumberGenerator.GetRandomInt(100, 599),
-                MaxResponseTime = RandomNumberGenerator.GetRandomDouble(0, 5)
+                MaxResponseTime = RandomNumberGenerator.GetRandomDouble(1, 5)
             };
 
             return responseItem;

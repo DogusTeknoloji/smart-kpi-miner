@@ -36,6 +36,8 @@ namespace DogusTeknoloji.SmartKPIMiner.Helpers
         {
             if (_appList.Count == 0) { _appList.Add(""); }
 
+            if (_appList.Contains(input)) { return 100; }
+
             double overallSimilarityRate = 0;
 
             List<int> similarityRateList = new List<int>();
@@ -43,8 +45,8 @@ namespace DogusTeknoloji.SmartKPIMiner.Helpers
             {
                 if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(potentialAppName)) { return -1; }
 
-                int m = input.Length + 1;
-                int n = potentialAppName.Length + 1;
+                int m = input.Length;
+                int n = potentialAppName.Length;
                 int[,] matrix = new int[m, n];
 
                 // Initialize the top and right of the table to 0,1,2,3...
@@ -53,7 +55,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Helpers
 
                 for (int i = 1; i < m; i++)
                 {
-                    for (int j = 0; j < n; j++)
+                    for (int j = 1; j < n; j++)
                     {
                         int cost = (potentialAppName[n - 1] == input[m - 1]) ? 0 : 1;
                         int min1 = matrix[i - 1, j] + 1;
@@ -64,7 +66,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Helpers
                     }
                 }
 
-                int similarityValue = matrix[m, n];
+                int similarityValue = matrix[m - 1, n - 1];
                 similarityRateList.Add(similarityValue);
             }
             overallSimilarityRate = similarityRateList.Average();

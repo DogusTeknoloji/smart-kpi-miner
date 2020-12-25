@@ -21,8 +21,9 @@ namespace DogusTeknoloji.SmartKPIMiner.Core
 
         public static IConfiguration GetConfiguration(string filename)
         {
+            if (string.IsNullOrEmpty(filename)) { return null; }
             string result = Path.Combine(CommonFunctions.AssemblyDirectory, filename);
-            if (string.IsNullOrEmpty(filename) || !File.Exists(result)) { return null; }
+            if (!File.Exists(result)) { return null; }
 
             if (!_settings.ContainsKey(filename))
             {
