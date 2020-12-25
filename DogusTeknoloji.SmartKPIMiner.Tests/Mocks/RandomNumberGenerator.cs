@@ -42,7 +42,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Tests.Mocks
         /// <returns></returns>
         public static double GetRandomDouble()
         {
-            double result = GetRandomDouble(0, 1);
+            double result = _randomObj.NextDouble();
             return result;
         }
         /// <summary>
@@ -52,15 +52,13 @@ namespace DogusTeknoloji.SmartKPIMiner.Tests.Mocks
         /// <returns></returns>
         public static double GetRandomDouble(int max)
         {
-            double result = GetRandomDouble(0, max);
+            double result = GetRandomDouble(1, max);
             return result;
         }
         public static double GetRandomDouble(int min, int max)
         {
-            int getFactor = _randomObj.Next(0, _factor.Length);
-            int randomInt = _randomObj.Next(min, max);
-            double result = randomInt / getFactor;
-            return result;
+            int randomInt = 1 / _randomObj.Next(min, max);
+            return randomInt;
         }
     }
 }

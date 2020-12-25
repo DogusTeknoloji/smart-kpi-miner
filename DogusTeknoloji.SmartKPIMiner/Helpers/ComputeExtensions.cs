@@ -105,6 +105,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Helpers
         }
         public static bool SplitAndGetLastPartOfString(this string data, char seperator, out string lastPart)
         {
+            if (data == null) { lastPart = null; return false; }
             string lastPartOfData = data.Split(seperator).LastOrDefault();
             lastPart = lastPartOfData;
             if (string.IsNullOrWhiteSpace(lastPartOfData)) { return false; }
