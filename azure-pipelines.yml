@@ -1,12 +1,17 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
+pool: 'WindowsPool'
+
+variables:
+  solution: '**/DogusTeknoloji.SmartKPIMiner.Agent.csproj'
+  testSolution: '**/DogusTeknoloji.SmartKPIMiner.Tests.csproj'
+  runtime: 'win-x64'
+  configuration: 'Release'
 
 steps:
 - task: replacetokens@3
-  displayName: Replace Variables
+  displayName: 'Replace Variables'
   inputs:
     targetFiles: '**/appsettings.json'
     encoding: 'auto'
@@ -19,16 +24,37 @@ steps:
     enableTelemetry: true
 
 - task: DotNetCoreCLI@2
-  displayName: Take release for Windows x64
+  displayName: 'Restore NuGet Packages'
+  inputs:
+    command: 'restore'
+    projects: '$(solution)'
+    feedsToUse: 'select'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Build Smart KPI Miner'
+  inputs:
+    command: 'build'
+    projects: '$(solution)'
+    arguments: '-c $(configuration) -r $(runtime)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Run Unit Tests'
+  inputs:
+    command: 'test'
+    projects: '$(testSolution)'
+    testRunTitle: 'Generic Unit Tests'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Take release for Windows x64'
   inputs:
     command: 'publish'
     publishWebProjects: false
-    projects: '**/DogusTeknoloji.SmartKPIMiner.Agent.csproj'
-    arguments: '-c Release -r win-x64 -o $(Build.ArtifactStagingDirectory)'
+    projects: '$(solution)'
+    arguments: '-c $(configuration) -r $(runtime) -o $(Build.ArtifactStagingDirectory)'
     zipAfterPublish: false
 
 - task: PublishBuildArtifacts@1
-  displayName: Publish Build Artifact
+  displayName: 'Publish Build Artifact'
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'SmartKPI-Agent'
