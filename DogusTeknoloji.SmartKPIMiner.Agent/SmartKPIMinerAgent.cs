@@ -18,7 +18,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
         }
         public Task DebugLogAsync()
         {
-            _loggingTimer = new Timer(callback: state => context.LogManager.ProcessLogQueue(), state: null, dueTime: 0, period: (int)TimeSpan.FromSeconds(10).TotalMilliseconds);
+            _loggingTimer = new Timer(callback: state => context.LogManager.ProcessLogQueue(), state: null, dueTime: 0, period: (long)TimeSpan.FromSeconds(10).TotalMilliseconds);
             return Task.CompletedTask;
         }
         public async Task KPIProcessAsync()
@@ -30,8 +30,8 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
         protected override void OnStart(string[] args)
         {
             base.OnStart(args);
-            _loggingTimer = new Timer(callback: state => context.LogManager.ProcessLogQueue(), state: null, dueTime: 0, period: (int)TimeSpan.FromSeconds(10).TotalMilliseconds);
-            _mainServiceTimer = new Timer(callback: async state => await KPIProcessAsync(), state: null, dueTime: 0, period: (int)TimeSpan.FromMinutes(15).TotalMilliseconds);
+            _loggingTimer = new Timer(callback: state => context.LogManager.ProcessLogQueue(), state: null, dueTime: 0, period: (long)TimeSpan.FromSeconds(10).TotalMilliseconds);
+            _mainServiceTimer = new Timer(callback: async state => await KPIProcessAsync(), state: null, dueTime: 0, period: (long)TimeSpan.FromMinutes(15).TotalMilliseconds);
         }
         protected override void OnStop()
         {
