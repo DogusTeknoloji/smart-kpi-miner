@@ -21,6 +21,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Data
             if (!optionsBuilder.IsConfigured)
             {
                 _ = optionsBuilder.UseSqlServer(this._connectionString);
+                
             }
 
             base.OnConfiguring(optionsBuilder);

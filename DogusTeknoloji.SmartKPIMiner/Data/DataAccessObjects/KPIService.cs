@@ -99,6 +99,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
                 }); ;
 
                 int result = await context.SaveChangesAsync();
+                context.Dispose();
                 return result > 0 ? (byte)1 : (byte)2;
             }
         }
