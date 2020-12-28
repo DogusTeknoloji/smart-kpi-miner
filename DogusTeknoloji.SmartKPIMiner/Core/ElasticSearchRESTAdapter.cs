@@ -1,4 +1,5 @@
 ﻿using DogusTeknoloji.SmartKPIMiner.Helpers;
+using DogusTeknoloji.SmartKPIMiner.Logging;
 using DogusTeknoloji.SmartKPIMiner.Model.ElasticSearch;
 using Newtonsoft.Json;
 using System;
@@ -42,7 +43,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Core
             }
             catch (WebException ex)
             {
-                LogManager logManager = new LogManager(); 
+                LogManager logManager = new LogManager();
                 logManager.Log($"Request Failed for {index} - message: {ex.Message}");
                 return null;
             }
