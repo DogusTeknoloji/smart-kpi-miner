@@ -42,6 +42,8 @@ namespace DogusTeknoloji.SmartKPIMiner.Core
             }
             catch (WebException ex)
             {
+                LogManager logManager = new LogManager(); 
+                logManager.Log($"Request Failed for {index} - message: {ex.Message}");
                 return null;
             }
 
