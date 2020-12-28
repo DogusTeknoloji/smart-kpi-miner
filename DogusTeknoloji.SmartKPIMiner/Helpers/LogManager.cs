@@ -29,7 +29,8 @@ namespace DogusTeknoloji.SmartKPIMiner.Helpers
 
         private StreamWriter GetLogStream()
         {
-            const string LOG_DIRECTORY = "Logs";
+            const string LOG_DIRECTORY = @"C:\SmartKPIMiner\Logs";
+            AutoPathRepair(LOG_DIRECTORY);
             string logFileName = "SmartKPI_Log_" + DateTime.Now.ToString("yyyy-MM-dd");
 
             if (!Directory.Exists(LOG_DIRECTORY))
@@ -51,6 +52,28 @@ namespace DogusTeknoloji.SmartKPIMiner.Helpers
             }
 
             return logWriter;
+        }
+
+        public bool AutoPathRepair(string dirPath)
+        {
+            try
+            {
+                string CheckLoc = string.Empty;
+                string[] location = dirPath.Split('\\');
+                for (int i = 0; i < location.Length - 1; i++)
+                {
+                    CheckLoc = CheckLoc.Insert(CheckLoc.Length, string.Format("{0}\\", location[i]));
+                    if (!Directory.Exists(CheckLoc))
+                    {
+                        Directory.CreateDirectory(CheckLoc);
+                    }
+                }
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
         }
     }
 }
