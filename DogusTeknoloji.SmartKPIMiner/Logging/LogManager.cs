@@ -6,6 +6,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Logging
 {
     public class LogManager
     {
+        const string LOG_DIRECTORY = @"C:\SmartKPIMiner_LOGS\Logs";
         private Queue<string> _logQueue = new Queue<string>();
         public void Log(string text)
         {
@@ -38,8 +39,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Logging
         private StreamWriter GetLogStream()
         {
             try
-            {
-                const string LOG_DIRECTORY = @"C:\SmartKPIMiner\Logs";
+            {  
                 AutoPathRepair(LOG_DIRECTORY);
                 string logFileName = "SmartKPI_Log_" + DateTime.Now.ToString("yyyy-MM-dd");
 

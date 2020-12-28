@@ -53,7 +53,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
             for (int i = 0; i < fragmentCount; i++)
             {
                 searchRange = searchRange.AddMinutes(CommonFunctions.UnifyingConstant); // add 15 min for each iteration.
-
+                LogManager.Log($"Current Iteration : {i}/{fragmentCount}, Current SearchParam: {searchRange}, Diff: {(int)(DateTime.Now-searchRange).TotalMinutes} mins", logHeader);
                 string requestBody = ElasticSearchRESTAdapter.GetRequestBody(start: searchRange);
                 string fullIndexName = ElasticSearchRESTAdapter.GetFullIndexName(index: searchIndex.IndexName, indexPattern: searchIndex.IndexPattern, indexPatternValue: searchRange);
                 Root responseRoot = await ElasticSearchRESTAdapter.GetResponseFromElasticUrlAsync(urlAddress: searchIndex.UrlAddress, index: fullIndexName, requestBody: requestBody);
@@ -79,21 +79,22 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
                     continue;
                 }
 
-                InsertDataToDatabase(aggregation: responseRoot.Aggregation, indexId: searchIndex.IndexId, logDate: searchRange);
+                await InsertDataToDatabaseAsync(aggregation: responseRoot.Aggregation, indexId: searchIndex.IndexId, logDate: searchRange, logHeader);
 
                 Console.WriteLine($"{searchIndex.UrlAddress}->{searchIndex.IndexName} [{i + 1}/{fragmentCount}] added.");
             }
 
-            LogManager.Log($"Index:{searchIndex.IndexName} processing completed. - {DateTime.Now}");
+            LogManager.Log($"processing completed. - {DateTime.Now}", logHeader);
         }
 
-        private void InsertDataToDatabase(Aggregation aggregation, long indexId, DateTime logDate)
+        private async Task InsertDataToDatabaseAsync(Aggregation aggregation, long indexId, DateTime logDate, string logHeader)
         {
             List<AggregationItem> aggregationItems = aggregation?.GetAsAggregationItems(); // if passed aggregation is not null... get items
 
             if (aggregationItems != null)
             {
-                Task insertOperation = this._kpiService.InsertKPIsAsync(items: aggregationItems, searchIndexId: indexId, logDate: logDate);
+                await this._kpiService.InsertKPIsAsync(items: aggregationItems, searchIndexId: indexId, logDate: logDate);
+                LogManager.Log($"Insert Data - Item Count: {aggregationItems.Count}", logHeader);
             }
         }
 
