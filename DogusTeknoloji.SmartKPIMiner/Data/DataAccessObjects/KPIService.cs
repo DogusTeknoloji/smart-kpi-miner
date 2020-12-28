@@ -78,7 +78,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
 
             using (var context = new SmartKPIDbContext(this._connectionString))
             {
-                _ = context.KPIMetrics.Add(new KPIMetric
+                KPIMetric metric = new KPIMetric
                 {
                     ServerName = item.ServerName.Trim(),
                     SiteName = item.SiteName.Trim(),
@@ -96,8 +96,9 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
                     IndexId = searchIndexId,
                     LogDate = logDate,
                     ComputeRuleId = ServiceManager.LastRuleId
-                }); ;
+                };
 
+                _ = context.KPIMetrics.Add(metric);
                 int result = await context.SaveChangesAsync();
                 context.Dispose();
                 return result > 0 ? (byte)1 : (byte)2;
@@ -111,7 +112,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
                 var task = await this.InsertKPIAsync(item, searchIndexId, logDate);
                 taskList.Add(task);
             }
-            bool isSuccess = taskList.TrueForAll(x => x < 2);            
+            bool isSuccess = taskList.TrueForAll(x => x < 2);
             taskList.Clear();
             return isSuccess;
         }
