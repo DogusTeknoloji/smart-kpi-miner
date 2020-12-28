@@ -12,21 +12,27 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
     public class OperationContext
     {
         private KPIService _kpiService;
+        public LogManager LogManager;
         public OperationContext()
         {
             _kpiService = ServiceManager._kpiService;
+            LogManager = new LogManager();
         }
 
         public async Task ProcessItemsAsync()
         {
+            LogManager.Log($"ProcessItems Triggered - {DateTime.Now}");
+
             IList<Task> indexTaskList = new List<Task>();
             IList<SearchIndex> searchIndices = await this._kpiService.GetSearchIndicesAsync();
+            LogManager.Log($"Index count - {searchIndices.Count}");
             foreach (SearchIndex searchIndex in searchIndices)
             {
                 Task indexPushOperation = ProcessIndexAsync(searchIndex);
                 indexTaskList.Add(indexPushOperation);
             }
             await Task.WhenAll(indexTaskList);
+            LogManager.Log($"ProcessItems completed for all tasks - {DateTime.Now}");
             Console.WriteLine("All Done");
         }
 
@@ -34,6 +40,8 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
         {
             DateTime startDate = await this._kpiService.GetSearchRangeAsync(searchIndex.IndexId); // Get last log insertion date 
             int fragmentCount = CalculateLoopCount(startDate); // Calculate fragment count
+            LogManager.Log($"Index:{searchIndex.IndexName}, Last Log insertion date - {startDate}");
+
 
             DateTime searchRange = startDate.AddMinutes(-CommonFunctions.UnifyingConstant); //It will be fix first iteration's 15 min addition.
 
@@ -50,6 +58,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
                     // Root is null for current search range
                     // Check for next day of search range > today 
                     // Example: searchRange: 05.01.2020 -> 06.01.2020 > 10.01.2020 ?
+                    LogManager.Log($"Index:{fullIndexName}, Search Range: {searchRange} query is returned null response");
                     double checkForNextDay = (DateTime.Now - searchRange.AddDays(1)).TotalMilliseconds;
                     if (checkForNextDay < 0)
                     {
@@ -69,6 +78,8 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
 
                 Console.WriteLine($"{searchIndex.UrlAddress}->{searchIndex.IndexName} [{i + 1}/{fragmentCount}] added.");
             }
+
+            LogManager.Log($"Index:{searchIndex.IndexName} processing completed. - {DateTime.Now}");
         }
 
         private void InsertDataToDatabase(Aggregation aggregation, long indexId, DateTime logDate)
@@ -83,15 +94,18 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
 
         private int CalculateLoopCount(DateTime start)
         {
+            LogManager.Log($"Current Date: {DateTime.Now}, Start Date: {start}");
             TimeSpan difference = DateTime.Now - start;
 
             int totalMins = (int)difference.TotalMinutes;
+            LogManager.Log($"Difference: {totalMins} minutes");
             if (totalMins < CommonFunctions.UnifyingConstant)
             {
                 return 0;// if count is 0 skip this index
             }
 
             int result = totalMins / CommonFunctions.UnifyingConstant;
+            LogManager.Log($"Fragment count until the current date: {result}");
             return result;
         }
 

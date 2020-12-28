@@ -9,7 +9,8 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
             using (SmartKPIMinerAgent minerAgent = new SmartKPIMinerAgent())
             {
                 System.Threading.Tasks.Task t = minerAgent.KPIProcessAsync();
-                System.Threading.Tasks.Task.WaitAll(t);
+                System.Threading.Tasks.Task tLog = minerAgent.DebugLogAsync();
+                System.Threading.Tasks.Task.WaitAll(new[] { t, tLog });
             }
 #elif RELEASE
             ServiceBase.Run(new SmartKPIMinerAgent());
