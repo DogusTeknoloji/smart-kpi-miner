@@ -105,14 +105,13 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
         }
         public async Task<bool> InsertKPIsAsync(List<AggregationItem> items, long searchIndexId, DateTime logDate)
         {
-            List<Task<byte>> taskList = new List<Task<byte>>();
+            List<byte> taskList = new List<byte>();
             foreach (var item in items)
             {
-                var task = this.InsertKPIAsync(item, searchIndexId, logDate);
+                var task = await this.InsertKPIAsync(item, searchIndexId, logDate);
                 taskList.Add(task);
             }
-            bool isSuccess = taskList.TrueForAll(x => x.Result < 2);
-            await Task.WhenAll(taskList);
+            bool isSuccess = taskList.TrueForAll(x => x < 2);            
             taskList.Clear();
             return isSuccess;
         }
