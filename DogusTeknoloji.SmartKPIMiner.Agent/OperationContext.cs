@@ -53,7 +53,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
             for (int i = 0; i < fragmentCount; i++)
             {
                 searchRange = searchRange.AddMinutes(CommonFunctions.UnifyingConstant); // add 15 min for each iteration.
-                LogManager.Log($"Current Iteration : {i}/{fragmentCount}, Current SearchParam: {searchRange}, Diff: {(int)(DateTime.Now-searchRange).TotalMinutes} mins", logHeader);
+                LogManager.Log($"Current Iteration : {i + 1}/{fragmentCount}, Current SearchParam: {searchRange}, Diff: {(int)(DateTime.Now - searchRange).TotalMinutes} mins", logHeader);
                 string requestBody = ElasticSearchRESTAdapter.GetRequestBody(start: searchRange);
                 string fullIndexName = ElasticSearchRESTAdapter.GetFullIndexName(index: searchIndex.IndexName, indexPattern: searchIndex.IndexPattern, indexPatternValue: searchRange);
                 Root responseRoot = await ElasticSearchRESTAdapter.GetResponseFromElasticUrlAsync(urlAddress: searchIndex.UrlAddress, index: fullIndexName, requestBody: requestBody);
@@ -93,8 +93,8 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
 
             if (aggregationItems != null)
             {
-                await this._kpiService.InsertKPIsAsync(items: aggregationItems, searchIndexId: indexId, logDate: logDate);
-                LogManager.Log($"Insert Data - Item Count: {aggregationItems.Count}", logHeader);
+                bool insertResult = await this._kpiService.InsertKPIsAsync(items: aggregationItems, searchIndexId: indexId, logDate: logDate);
+                LogManager.Log($"Insert Data - Item Count: {aggregationItems.Count}, insert result: {insertResult}", logHeader);
             }
         }
 
