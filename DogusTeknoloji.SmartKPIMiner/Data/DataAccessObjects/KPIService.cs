@@ -64,9 +64,9 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
                 return DateTime.Now.AddDays(-7);
             }
         }
-        public async Task InsertKPIAsync(AggregationItem item, long searchIndexId, DateTime logDate)
+        public async Task<byte> InsertKPIAsync(AggregationItem item, long searchIndexId, DateTime logDate)
         {
-            if (!item.Url.CheckIsFormatIncluded()) { return; }
+            if (!item.Url.CheckIsFormatIncluded()) { return 0; }
 
             double failedPercentage = item.GetFailedRate(out int failedCount, out double failedAverage);
             double successPercentage = item.GetSuccessRate(out int successCount, out double successAverage);
@@ -98,16 +98,22 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
                     ComputeRuleId = ServiceManager.LastRuleId
                 }); ;
 
-                _ = await context.SaveChangesAsync();
+                int result = await context.SaveChangesAsync();
+                return result > 0 ? (byte)1 : (byte)2;
             }
         }
-        public async Task InsertKPIsAsync(List<AggregationItem> items, long searchIndexId, DateTime logDate)
+        public async Task<bool> InsertKPIsAsync(List<AggregationItem> items, long searchIndexId, DateTime logDate)
         {
+            List<Task<byte>> taskList = new List<Task<byte>>();
             foreach (var item in items)
             {
                 var task = this.InsertKPIAsync(item, searchIndexId, logDate);
+                taskList.Add(task);
             }
-            await Task.WhenAll();
+            bool isSuccess = taskList.TrueForAll(x => x.Result < 2);
+            await Task.WhenAll(taskList);
+            taskList.Clear();
+            return isSuccess;
         }
 
         public async Task InsertComputeRule(IEnumerable<string> httpSuccessCodes)
