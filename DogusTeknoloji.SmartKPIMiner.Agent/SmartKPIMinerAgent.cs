@@ -33,11 +33,11 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
         public Task LogProcess()
         {
             var hasNoLock = false;
-            Monitor.TryEnter(_mainSvcLocker, ref hasNoLock);
+            Monitor.TryEnter(_logSvcLocker, ref hasNoLock);
             if (hasNoLock)
             {
                 context.LogManager.ProcessLogQueue();
-                Monitor.Exit(_mainSvcLocker);
+                Monitor.Exit(_logSvcLocker);
             }
             return Task.CompletedTask;
         }
@@ -51,6 +51,10 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
                 ServiceManager.Initialize();
                 await context.ProcessItemsAsync();
                 Monitor.Exit(_mainSvcLocker);
+            }
+            else
+            {
+                return false;
             }
 
             return true;
