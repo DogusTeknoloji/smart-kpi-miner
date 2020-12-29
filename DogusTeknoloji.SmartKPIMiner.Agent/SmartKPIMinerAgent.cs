@@ -8,11 +8,18 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
 {
     public class SmartKPIMinerAgent : ServiceBase
     {
+        static EventWaitHandle _waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset, "wait-handle");
+        static bool _signaled = false;
+        // TO DO: Manual Reset Event'e bakılacak.
         protected Timer _mainServiceTimer;
         protected Timer _loggingTimer;
         protected OperationContext context = new OperationContext();
+
         protected long _mainSvcDueTime = 0, _mainSvcPeriod = 0;
+        protected object _mainSvcLocker = new object();
+
         protected long _logSvcDueTime = 0, _logSvcPeriod = 0;
+        protected object _logSvcLocker = new object();
 
         public SmartKPIMinerAgent()
         {
@@ -21,38 +28,54 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
 
             this._logSvcDueTime = 0;
             this._logSvcPeriod = (long)TimeSpan.FromSeconds(10).TotalMilliseconds;
-
-            _loggingTimer = new Timer(callback: state => LogProcessAsync(), state: null, dueTime: Timeout.Infinite, period: Timeout.Infinite);
-            _mainServiceTimer = new Timer(callback: async state => await KPIProcessAsync(), state: null, dueTime: Timeout.Infinite, period: Timeout.Infinite);
         }
 
-        public void LogProcessAsync()
+        public Task LogProcess()
         {
-            _loggingTimer?.Change(dueTime: Timeout.Infinite, period: Timeout.Infinite);
-            context.LogManager.ProcessLogQueue();
-            _loggingTimer?.Change(dueTime: _logSvcDueTime, period: _logSvcPeriod);
+            var hasNoLock = false;
+            Monitor.TryEnter(_mainSvcLocker, ref hasNoLock);
+            if (hasNoLock)
+            {
+                context.LogManager.ProcessLogQueue();
+                Monitor.Exit(_mainSvcLocker);
+            }
+            return Task.CompletedTask;
         }
 
-        public async Task KPIProcessAsync()
+        public async Task<bool> KPIProcessAsync()
         {
-            _mainServiceTimer?.Change(dueTime: Timeout.Infinite, period: Timeout.Infinite);
-            ServiceManager.Initialize();
-            await context.ProcessItemsAsync();
-            _mainServiceTimer?.Change(dueTime: _mainSvcDueTime, period: _mainSvcPeriod);
+            var hasNoLock = false;
+            Monitor.TryEnter(_mainSvcLocker, ref hasNoLock);
+            if (hasNoLock)
+            {
+                ServiceManager.Initialize();
+                await context.ProcessItemsAsync();
+                Monitor.Exit(_mainSvcLocker);
+            }
+
+            return true;
+        }
+
+        public void ServiceTrigger()
+        {
+            _loggingTimer = new Timer(callback: async state => await LogProcess(), state: null, dueTime: _logSvcDueTime, period: _logSvcPeriod);
+            _mainServiceTimer = new Timer(callback: async state => await KPIProcessAsync(), state: null, dueTime: _mainSvcDueTime, period: _mainSvcPeriod);
         }
 
         protected override void OnStart(string[] args)
         {
             base.OnStart(args);
-            _mainServiceTimer?.Change(dueTime: _mainSvcDueTime, period: _mainSvcPeriod);
-            _loggingTimer?.Change(dueTime: _logSvcDueTime, period: _logSvcPeriod);
+
+            ServiceTrigger();
         }
 
         protected override void OnStop()
         {
             base.OnStop();
+
             _mainServiceTimer?.Change(dueTime: Timeout.Infinite, period: Timeout.Infinite);
             _mainServiceTimer.DisposeAsync();
+
             _loggingTimer?.Change(dueTime: Timeout.Infinite, period: Timeout.Infinite);
             _loggingTimer.DisposeAsync();
         }

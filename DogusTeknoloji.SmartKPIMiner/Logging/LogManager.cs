@@ -8,6 +8,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Logging
     {
         const string LOG_DIRECTORY = @"C:\SmartKPIMiner_LOGS\Logs";
         private Queue<string> _logQueue = new Queue<string>();
+
         public void Log(string text)
         {
             if (string.IsNullOrWhiteSpace(text)) { return; }
@@ -23,23 +24,23 @@ namespace DogusTeknoloji.SmartKPIMiner.Logging
 
         public void ProcessLogQueue()
         {
-            StreamWriter logWriter = GetLogStream();
-            if (logWriter == null) { return; }
-            while (_logQueue.Count > 0)
-            {
-                string item = _logQueue.Dequeue();
-                string logText = $"{DateTime.Now} - {item}";
-                logWriter.WriteLine(logText);
-            }
-            logWriter.Flush();
-            logWriter.Close();
-            logWriter.Dispose();
+                StreamWriter logWriter = GetLogStream();
+                if (logWriter == null) { return; }
+                while (_logQueue.Count > 0)
+                {
+                    string item = _logQueue.Dequeue();
+                    string logText = $"{DateTime.Now} - {item}";
+                    logWriter.WriteLine(logText);
+                }
+                logWriter.Flush();
+                logWriter.Close();
+                logWriter.Dispose();
         }
 
         private StreamWriter GetLogStream()
         {
             try
-            {  
+            {
                 AutoPathRepair(LOG_DIRECTORY);
                 string logFileName = "SmartKPI_Log_" + DateTime.Now.ToString("yyyy-MM-dd");
 
