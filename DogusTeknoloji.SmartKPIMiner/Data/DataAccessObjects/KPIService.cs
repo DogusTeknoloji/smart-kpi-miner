@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
@@ -14,6 +15,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
     {
         private readonly string _connectionString;
         private readonly ExpiringList<string> _excludedFileExtensions = new ExpiringList<string>(expiringPeriod: TimeSpan.FromSeconds(60));
+        private readonly Logging.LogManager logManager = new Logging.LogManager();
         protected KPIService()
         {
 
@@ -99,7 +101,21 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
                 };
 
                 _ = context.KPIMetrics.Add(metric);
-                int result = await context.SaveChangesAsync();
+                int result = -1;
+            retry:
+                try
+                {
+                    if (result != -1)
+                    {
+                        result = await context.SaveChangesAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logManager.Log($"Message: {ex.Message}", $"Index:{searchIndexId},LogDate:{logDate}");
+                    Thread.Sleep(500);
+                    goto retry;
+                }
                 context.Dispose();
                 return result > 0 ? (byte)1 : (byte)2;
             }

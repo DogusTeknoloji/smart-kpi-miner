@@ -8,9 +8,6 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
 {
     public class SmartKPIMinerAgent : ServiceBase
     {
-        static EventWaitHandle _waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset, "wait-handle");
-        static bool _signaled = false;
-        // TO DO: Manual Reset Event'e bakılacak.
         protected Timer _mainServiceTimer;
         protected Timer _loggingTimer;
         protected OperationContext context = new OperationContext();
