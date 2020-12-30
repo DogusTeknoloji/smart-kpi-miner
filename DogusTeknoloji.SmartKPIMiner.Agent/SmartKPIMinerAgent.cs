@@ -12,55 +12,66 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
         protected Timer _loggingTimer;
         protected OperationContext context = new OperationContext();
 
-        protected long _mainSvcDueTime = 0, _mainSvcPeriod = 0;
-        protected object _mainSvcLocker = new object();
-
-        protected long _logSvcDueTime = 0, _logSvcPeriod = 0;
-        protected object _logSvcLocker = new object();
+        protected bool _mainSvcBLock = false;
+        protected bool _logSvcBlock = false;
 
         public SmartKPIMinerAgent()
         {
-            this._mainSvcDueTime = 0;
-            this._mainSvcPeriod = (long)TimeSpan.FromMinutes(15).TotalMilliseconds;
-
-            this._logSvcDueTime = 0;
-            this._logSvcPeriod = (long)TimeSpan.FromSeconds(10).TotalMilliseconds;
         }
 
         public Task LogProcess()
         {
-            var hasNoLock = false;
-            Monitor.TryEnter(_logSvcLocker, ref hasNoLock);
-            if (hasNoLock)
+            if (!_logSvcBlock)
             {
+                _logSvcBlock = true;
                 context.LogManager.ProcessLogQueue();
-                Monitor.Exit(_logSvcLocker);
+                _logSvcBlock = false;
             }
+
+            //var hasNoLock = false;
+            //Monitor.TryEnter(_logSvcLocker, ref hasNoLock);
+            //if (hasNoLock)
+            //{
+
+            //    Monitor.Exit(_logSvcLocker);
+            //}
             return Task.CompletedTask;
         }
 
         public async Task<bool> KPIProcessAsync()
         {
-            var hasNoLock = false;
-            Monitor.TryEnter(_mainSvcLocker, ref hasNoLock);
-            if (hasNoLock)
+            if (!_mainSvcBLock)
             {
+                _mainSvcBLock = true;
                 ServiceManager.Initialize();
                 await context.ProcessItemsAsync();
-                Monitor.Exit(_mainSvcLocker);
+                _mainSvcBLock = false;
             }
             else
             {
                 return false;
             }
 
+            //var hasNoLock = false;
+            //Monitor.TryEnter(_mainSvcLocker, ref hasNoLock);
+            //if (hasNoLock)
+            //{
+            //    ServiceManager.Initialize();
+            //    await context.ProcessItemsAsync();
+            //    Monitor.Exit(_mainSvcLocker);
+            //}
+            //else
+            //{
+            //    return false;
+            //}
+
             return true;
         }
 
         public void ServiceTrigger()
         {
-            _loggingTimer = new Timer(callback: async state => await LogProcess(), state: null, dueTime: _logSvcDueTime, period: _logSvcPeriod);
-            _mainServiceTimer = new Timer(callback: async state => await KPIProcessAsync(), state: null, dueTime: _mainSvcDueTime, period: _mainSvcPeriod);
+            _loggingTimer = new Timer(callback: async state => await LogProcess(), state: null, dueTime: 0, period: (long)TimeSpan.FromSeconds(10).TotalMilliseconds);
+            _mainServiceTimer = new Timer(callback: async state => await KPIProcessAsync(), state: null, dueTime: 0, period: (long)TimeSpan.FromMinutes(15).TotalMilliseconds);
         }
 
         protected override void OnStart(string[] args)
