@@ -64,9 +64,9 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
                 return DateTime.Now.AddDays(-7);
             }
         }
-        public async Task InsertKPIAsync(AggregationItem item, long searchIndexId, DateTime logDate)
+        public async Task<KPIMetric> GetKPIAsync(AggregationItem item, long searchIndexId, DateTime logDate)
         {
-            if (!item.Url.CheckIsFormatIncluded()) { return; }
+            if (!item.Url.CheckIsFormatIncluded()) { return null; }
 
             double failedPercentage = item.GetFailedRate(out int failedCount, out double failedAverage);
             double successPercentage = item.GetSuccessRate(out int successCount, out double successAverage);
@@ -76,38 +76,56 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
                 ServiceManager.LastRuleId = await GetMaxComputeRuleId();
             }
 
+            return new KPIMetric
+            {
+                ServerName = item.ServerName.Trim(),
+                SiteName = item.SiteName.Trim(),
+                PageUrl = item.Url.Trim(),
+                AverageResponseTime = successAverage == 0 ? failedAverage     // if success average is 0 pass failed average
+                                    : failedAverage == 0 ? successAverage     // if failed average is 0 pass success average
+                                    : ((successAverage + failedAverage) / 2), // else take arithmetic average
+                SuccessAverageResponseTime = successAverage,
+                FailedAverageResponseTime = failedAverage,
+                TotalRequestCount = item.RequestCount,
+                FailedPercentage = failedPercentage,
+                FailedRequestCount = failedCount,
+                SuccessPercentage = successPercentage,
+                SuccessRequestCount = successCount,
+                IndexId = searchIndexId,
+                LogDate = logDate,
+                ComputeRuleId = ServiceManager.LastRuleId
+            };
+        }
+        public async Task InserKPIAsync(AggregationItem item, long searchIndexId, DateTime logDate)
+        {
             using (var context = new SmartKPIDbContext(this._connectionString))
             {
-                _ = context.KPIMetrics.Add(new KPIMetric
+                KPIMetric metric = await this.GetKPIAsync(item, searchIndexId, logDate);
+                if (metric != null)
                 {
-                    ServerName = item.ServerName.Trim(),
-                    SiteName = item.SiteName.Trim(),
-                    PageUrl = item.Url.Trim(),
-                    AverageResponseTime = successAverage == 0 ? failedAverage     // if success average is 0 pass failed average
-                                        : failedAverage == 0 ? successAverage     // if failed average is 0 pass success average
-                                        : ((successAverage + failedAverage) / 2), // else take arithmetic average
-                    SuccessAverageResponseTime = successAverage,
-                    FailedAverageResponseTime = failedAverage,
-                    TotalRequestCount = item.RequestCount,
-                    FailedPercentage = failedPercentage,
-                    FailedRequestCount = failedCount,
-                    SuccessPercentage = successPercentage,
-                    SuccessRequestCount = successCount,
-                    IndexId = searchIndexId,
-                    LogDate = logDate,
-                    ComputeRuleId = ServiceManager.LastRuleId
-                }); ;
-
-                _ = await context.SaveChangesAsync();
+                    context.KPIMetrics.Add(metric);
+                    await context.SaveChangesAsync();
+                }
             }
         }
         public async Task InsertKPIsAsync(List<AggregationItem> items, long searchIndexId, DateTime logDate)
         {
-            foreach (var item in items)
+            List<KPIMetric> metrics = new List<KPIMetric>();
+            using (var context = new SmartKPIDbContext(this._connectionString))
             {
-                var task = this.InsertKPIAsync(item, searchIndexId, logDate);
+                foreach (var item in items)
+                {
+                    KPIMetric metric = await this.GetKPIAsync(item, searchIndexId, logDate);
+
+                    if (metric != null)
+                    {
+                        metrics.Add(metric);
+                    }
+                }
+                context.KPIMetrics.AddRange(metrics);
+                await context.SaveChangesAsync();
+                await Task.WhenAll();
             }
-            await Task.WhenAll();
         }
 
         public async Task InsertComputeRule(IEnumerable<string> httpSuccessCodes)
