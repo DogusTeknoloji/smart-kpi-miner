@@ -19,6 +19,9 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
         public SmartKPIMinerAgent()
         {
             ConsoleLogging.IsFileLoggingEnabled = true;
+#if RELEASE
+            ConsoleLogging.WindowsServiceMode = true;
+#endif
         }
         public async Task KPIProcessAsync()
         {
