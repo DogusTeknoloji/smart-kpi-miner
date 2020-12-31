@@ -52,7 +52,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.Migrations.InitialCreate
             migrationBuilder.InsertData(
                 table: "SearchIndices",
                 columns: new[] { "IndexName", "UrlAddress" },
-                values: new[] { "iis-dmarin*", "10.115.207.72" });
+                values: new[] { "iis-dmarin-*", "10.115.207.72" });
 
             migrationBuilder.InsertData(
                 table: "SearchIndices",
