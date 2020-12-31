@@ -1,4 +1,5 @@
 ﻿using DogusTeknoloji.SmartKPIMiner.Core;
+using DogusTeknoloji.SmartKPIMiner.Helpers;
 using System;
 using System.ServiceProcess;
 using System.Threading;
@@ -11,6 +12,9 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
         protected Timer _mainServiceTimer;
         protected OperationContext context = new OperationContext();
         protected bool notIsProcessLocked = true;
+
+        protected Timer _loggingSvcTimer;
+        protected bool notIsLoggingLocked = true;
         public SmartKPIMinerAgent()
         {
 
@@ -26,16 +30,34 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
             }
         }
 
+        public Task LogProcessAsync()
+        {
+            if (notIsLoggingLocked)
+            {
+                notIsLoggingLocked = false;
+                CommonFunctions.LogManager.ProcessLogQueue();
+                notIsLoggingLocked = true;
+            }
+            return Task.CompletedTask;
+        }
+        public void SimulateServiceStart()
+        {
+            this.OnStart(null);
+        }
         protected override void OnStart(string[] args)
         {
             base.OnStart(args);
             _mainServiceTimer = new Timer(callback: async state => await KPIProcessAsync(), state: null, dueTime: 0, period: (int)TimeSpan.FromMinutes(15).TotalMilliseconds);
+            _loggingSvcTimer = new Timer(callback: state => LogProcessAsync(), state: null, dueTime: 0, period: (int)TimeSpan.FromSeconds(2).TotalMilliseconds);
         }
         protected override void OnStop()
         {
             base.OnStop();
             _mainServiceTimer?.Change(dueTime: Timeout.Infinite, period: 0);
             _mainServiceTimer.DisposeAsync();
+
+            _loggingSvcTimer?.Change(dueTime: Timeout.Infinite, period: 0);
+            _loggingSvcTimer.DisposeAsync();
         }
     }
 }
