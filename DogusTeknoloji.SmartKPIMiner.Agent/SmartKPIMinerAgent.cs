@@ -10,14 +10,20 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
     {
         protected Timer _mainServiceTimer;
         protected OperationContext context = new OperationContext();
+        protected bool notIsProcessLocked = true;
         public SmartKPIMinerAgent()
         {
 
         }
         public async Task KPIProcessAsync()
         {
-            ServiceManager.Initialize();
-            await context.ProcessItemsAsync();
+            if (notIsProcessLocked)
+            {
+                notIsProcessLocked = false;
+                ServiceManager.Initialize();
+                await context.ProcessItemsAsync();
+                notIsProcessLocked = true;
+            }
         }
 
         protected override void OnStart(string[] args)
