@@ -1,6 +1,7 @@
 ﻿using DogusTeknoloji.SmartKPIMiner.Core;
 using DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects;
 using DogusTeknoloji.SmartKPIMiner.Helpers;
+using DogusTeknoloji.SmartKPIMiner.Logging;
 using DogusTeknoloji.SmartKPIMiner.Model.Database;
 using DogusTeknoloji.SmartKPIMiner.Model.ElasticSearch;
 using System;
@@ -27,7 +28,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
                 indexTaskList.Add(indexPushOperation);
             }
             await Task.WhenAll(indexTaskList);
-            Console.WriteLine("All Done");
+            ConsoleLogging.LogLine($"KPI Process done for {searchIndices.Count} indices", ConsoleLogging.LogSeverity.Info);
         }
 
         private async Task ProcessIndexAsync(SearchIndex searchIndex)
@@ -61,13 +62,13 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
                     // 24 Hour * 60 Min / fragmentation by minute) - 1 for current iteration
                     i += (24 * 60 / CommonFunctions.UnifyingConstant) - 1;
 
-                    Console.WriteLine($"{searchIndex.UrlAddress}->{searchIndex.IndexName} is expired, skipped to [{i + 1}/{fragmentCount}].");
+                    ConsoleLogging.LogLine($"{searchIndex.UrlAddress}-> {searchIndex.IndexName} is expired, skipped to [{i + 1}/{fragmentCount}].");
                     continue;
                 }
 
                 InsertDataToDatabase(aggregation: responseRoot.Aggregation, indexId: searchIndex.IndexId, logDate: searchRange);
 
-                Console.WriteLine($"{searchIndex.UrlAddress}->{searchIndex.IndexName} [{i + 1}/{fragmentCount}] added.");
+                ConsoleLogging.LogLine($"{searchIndex.UrlAddress}-> {searchIndex.IndexName} [{i + 1}/{fragmentCount}] added.");
             }
         }
 

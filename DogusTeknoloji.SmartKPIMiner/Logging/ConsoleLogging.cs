@@ -1,10 +1,12 @@
-﻿using System;
+﻿using DogusTeknoloji.SmartKPIMiner.Helpers;
+using System;
 
 namespace DogusTeknoloji.SmartKPIMiner.Logging
 {
     public static class ConsoleLogging
     {
         public enum LogSeverity { Verbose = 0, Info = 1, Warning = 2, Error = 3 }
+        public static bool IsFileLoggingEnabled = false;
 
         private static string _header = $"[{DateTime.Now}] - ";
         private static bool _setBackground = true;
@@ -27,50 +29,61 @@ namespace DogusTeknoloji.SmartKPIMiner.Logging
             };
         }
 
+        private static void BaseLog(string text, LogSeverity severity, bool header)
+        {
+            SetSeverity(severity);
+            _header = $"[{DateTime.Now}] - ";
+            string headerText = header ? _header : "";
+            Console.Write(headerText + text);
+            if (IsFileLoggingEnabled)
+            {
+                CommonFunctions.LogManager.Log(text);
+            }
+        }
+        private static void BaseLogLine(string text, LogSeverity severity, bool header)
+        {
+            SetSeverity(severity);
+            _header = $"[{DateTime.Now}] - ";
+            string headerText = header ? _header : "";
+            Console.WriteLine(headerText + text);
+            if (IsFileLoggingEnabled)
+            {
+                CommonFunctions.LogManager.Log(text);
+            }
+        }
+
         public static void LogLine(string text)
         {
-            SetSeverity(LogSeverity.Verbose);
-            Console.WriteLine(_header + text);
+            BaseLogLine(text, severity: LogSeverity.Verbose, header: true);
         }
         public static void LogLine(string text, LogSeverity severity)
         {
-            SetSeverity(severity);
-            Console.WriteLine(_header + text);
+            BaseLogLine(text, severity, header: true);
         }
         public static void LogLine(string text, bool header)
         {
-            SetSeverity(LogSeverity.Verbose);
-            string headerText = header ? _header : "";
-            Console.WriteLine(headerText + text);
+            BaseLogLine(text, severity: LogSeverity.Verbose, header);
         }
         public static void LogLine(string text, LogSeverity severity, bool header)
         {
-            SetSeverity(severity);
-            string headerText = header ? _header : "";
-            Console.WriteLine(headerText + text);
+            BaseLogLine(text, severity, header);
         }
 
         public static void Log(string text)
         {
-            SetSeverity(LogSeverity.Verbose);
-            Console.Write(_header + text);
+            BaseLog(text, severity: LogSeverity.Verbose, header: true);
         }
         public static void Log(string text, LogSeverity severity)
         {
-            SetSeverity(severity);
-            Console.Write(_header + text);
+            BaseLog(text, severity, header: true);
         }
         public static void Log(string text, bool header)
         {
-            SetSeverity(LogSeverity.Verbose);
-            string headerText = header ? _header : "";
-            Console.Write(headerText + text);
+            BaseLog(text, severity: LogSeverity.Verbose, header);
         }
         public static void Log(string text, LogSeverity severity, bool header)
         {
-            SetSeverity(severity);
-            string headerText = header ? _header : "";
-            Console.Write(headerText + text);
+            BaseLog(text, severity, header);
         }
     }
 }

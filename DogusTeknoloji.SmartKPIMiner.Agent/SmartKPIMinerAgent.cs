@@ -1,5 +1,6 @@
 ﻿using DogusTeknoloji.SmartKPIMiner.Core;
 using DogusTeknoloji.SmartKPIMiner.Helpers;
+using DogusTeknoloji.SmartKPIMiner.Logging;
 using System;
 using System.ServiceProcess;
 using System.Threading;
@@ -17,10 +18,11 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
         protected bool notIsLoggingLocked = true;
         public SmartKPIMinerAgent()
         {
-
+            ConsoleLogging.IsFileLoggingEnabled = true;
         }
         public async Task KPIProcessAsync()
         {
+            ConsoleLogging.LogLine("{{{PULSE}}} KPI Process", severity: ConsoleLogging.LogSeverity.Info);
             if (notIsProcessLocked)
             {
                 notIsProcessLocked = false;
@@ -28,15 +30,24 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
                 await context.ProcessItemsAsync();
                 notIsProcessLocked = true;
             }
+            else
+            {
+                ConsoleLogging.LogLine("[[[BYPASS]]] KPI Process is locked and in progress!", severity: ConsoleLogging.LogSeverity.Warning);
+            }
         }
 
         public Task LogProcessAsync()
         {
+            ConsoleLogging.LogLine("{{{PULSE}}} Log Queue Process", severity: ConsoleLogging.LogSeverity.Info);
             if (notIsLoggingLocked)
             {
                 notIsLoggingLocked = false;
                 CommonFunctions.LogManager.ProcessLogQueue();
                 notIsLoggingLocked = true;
+            }
+            else
+            {
+                ConsoleLogging.LogLine("[[[BYPASS]]] Log Queue Process is locked and in progress!", severity: ConsoleLogging.LogSeverity.Warning);
             }
             return Task.CompletedTask;
         }
