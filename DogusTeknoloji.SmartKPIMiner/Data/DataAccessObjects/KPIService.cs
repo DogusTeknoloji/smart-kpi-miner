@@ -50,12 +50,11 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
                 return await context.SearchIndices.Where(x => x.IsActive).ToListAsync();
             }
         }
-        public async Task<DateTime> GetSearchRangeAsync(long indexId)
+        public DateTime GetSearchRange(long indexId)
         {
             using (var context = new SmartKPIDbContext(this._connectionString))
             {
-                DateTime? maxLogDate = await context.KPIMetrics.Where(x => x.IndexId == indexId)
-                                                                  .MaxAsync(x => x.LogDate);
+                DateTime? maxLogDate = context.KPIMetricTimers.FirstOrDefault(x => x.IndexId == indexId)?.LastInsertDate;
                 if (maxLogDate != null)
                 {
                     maxLogDate = maxLogDate.Value.AddMilliseconds(10);
@@ -64,7 +63,29 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
                 return DateTime.Now.AddDays(-7);
             }
         }
-        public async Task<KPIMetric> GetKPIAsync(AggregationItem item, long searchIndexId, DateTime logDate)
+
+        public bool InsertOrUpdateMetricTimer(long indexId, DateTime logDate)
+        {
+            using (var context = new SmartKPIDbContext(this._connectionString))
+            {
+                KPIMetricTimer metricTimer = context.KPIMetricTimers.FirstOrDefault(x => x.IndexId == indexId);
+                if (metricTimer != null)
+                {
+                    metricTimer.LastInsertDate = logDate;
+                    metricTimer.RowModifyDateLog = DateTime.Now;
+                    context.KPIMetricTimers.Update(metricTimer);
+                }
+                else
+                {
+                    metricTimer = new KPIMetricTimer { IndexId = indexId, LastInsertDate = logDate };
+                    context.KPIMetricTimers.Add(metricTimer);
+                }
+
+                int result = context.SaveChanges();
+                return result > 0;
+            }
+        }
+        public KPIMetric GetKPI(AggregationItem item, long searchIndexId, DateTime logDate)
         {
             if (!item.Url.CheckIsFormatIncluded()) { return null; }
 
@@ -73,7 +94,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
 
             if (ServiceManager.LastRuleId == 0)
             {
-                ServiceManager.LastRuleId = await GetMaxComputeRuleId();
+                ServiceManager.LastRuleId = GetMaxComputeRuleId();
             }
 
             return new KPIMetric
@@ -100,7 +121,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
         {
             using (var context = new SmartKPIDbContext(this._connectionString))
             {
-                KPIMetric metric = await this.GetKPIAsync(item, searchIndexId, logDate);
+                KPIMetric metric = this.GetKPI(item, searchIndexId, logDate);
                 if (metric != null)
                 {
                     context.KPIMetrics.Add(metric);
@@ -115,7 +136,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
             {
                 foreach (var item in items)
                 {
-                    KPIMetric metric = await this.GetKPIAsync(item, searchIndexId, logDate);
+                    KPIMetric metric = this.GetKPI(item, searchIndexId, logDate);
 
                     if (metric != null)
                     {
@@ -123,7 +144,11 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
                     }
                 }
                 context.KPIMetrics.AddRange(metrics);
-                await context.SaveChangesAsync();
+                int result = await context.SaveChangesAsync();
+                if (result > 0)
+                {
+                    this.InsertOrUpdateMetricTimer(indexId: searchIndexId, logDate: logDate);
+                }
                 await Task.WhenAll();
             }
         }
@@ -145,15 +170,15 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
                 }
             }
 
-            ServiceManager.LastRuleId = await GetMaxComputeRuleId();
+            ServiceManager.LastRuleId = GetMaxComputeRuleId();
         }
 
-        public async Task<long> GetMaxComputeRuleId()
+        public long GetMaxComputeRuleId()
         {
             using (var context = new SmartKPIDbContext(this._connectionString))
             {
-                DateTime maxDate = await context.ComputeRules.MaxAsync(x => x.CreateDate);
-                ComputeRule lastRule = await context.ComputeRules.FirstOrDefaultAsync(x => x.CreateDate == maxDate);
+                DateTime maxDate = context.ComputeRules.Max(x => x.CreateDate);
+                ComputeRule lastRule = context.ComputeRules.FirstOrDefault(x => x.CreateDate == maxDate);
                 return lastRule.ComputeRuleId;
             }
         }

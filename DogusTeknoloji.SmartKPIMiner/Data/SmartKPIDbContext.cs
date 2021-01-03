@@ -35,6 +35,10 @@ namespace DogusTeknoloji.SmartKPIMiner.Data
                 entity.Property(property => property.FailedAverageResponseTime).HasDefaultValue(0.0);
             });
 
+            modelBuilder.Entity<KPIMetricTimer>(entity => {
+                entity.Property(property => property.RowModifyDateLog).HasDefaultValueSql("getdate()");
+            });
+
             modelBuilder.Entity<RootAppFeed>(entity => entity.Property(property => property.CreateDate).HasDefaultValueSql("getdate()"));
             modelBuilder.Entity<SearchIndex>(entity =>
             {
@@ -52,6 +56,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Data
         public DbSet<ExcludedFileFormat> ExcludedFileFormats { get; set; }
         public DbSet<SearchIndex> SearchIndices { get; set; }
         public DbSet<KPIMetric> KPIMetrics { get; set; }
+        public DbSet<KPIMetricTimer> KPIMetricTimers { get; set; }
         public DbSet<RootAppFeed> RootAppFeeds { get; set; }
         public DbSet<SimilarAppFeed> SimilarAppFeeds { get; set; }
         public DbSet<ServiceLog> ServiceLogs { get; set; }

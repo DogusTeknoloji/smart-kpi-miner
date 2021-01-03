@@ -33,7 +33,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
 
         private async Task ProcessIndexAsync(SearchIndex searchIndex)
         {
-            DateTime startDate = await this._kpiService.GetSearchRangeAsync(searchIndex.IndexId); // Get last log insertion date 
+            DateTime startDate = this._kpiService.GetSearchRange(searchIndex.IndexId); // Get last log insertion date 
             int fragmentCount = CalculateLoopCount(startDate); // Calculate fragment count
 
             DateTime searchRange = startDate.AddMinutes(-CommonFunctions.UnifyingConstant); //It will be fix first iteration's 15 min addition.
