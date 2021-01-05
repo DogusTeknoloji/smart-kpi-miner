@@ -36,7 +36,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
             DateTime startDate = this._kpiService.GetSearchRange(searchIndex.IndexId); // Get last log insertion date 
             int fragmentCount = CalculateLoopCount(startDate); // Calculate fragment count
 
-            DateTime searchRange = startDate.AddMinutes(-CommonFunctions.UnifyingConstant); //It will be fix first iteration's 15 min addition.
+            DateTime searchRange = startDate;
 
             for (int i = 0; i < fragmentCount; i++)
             {
