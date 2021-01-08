@@ -86,7 +86,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
         {
             TimeSpan difference = DateTime.Now - start;
 
-            int totalMins = (int)difference.TotalMinutes;
+            int totalMins = (int)difference.TotalMinutes - CommonFunctions.UnifyingConstant;
             if (totalMins < CommonFunctions.UnifyingConstant)
             {
                 return 0;// if count is 0 skip this index
