@@ -60,7 +60,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
                     maxLogDate = maxLogDate.Value.AddMilliseconds(10);
                     return maxLogDate.Value;
                 }
-                return DateTime.Now.AddDays(-7);
+                return DateTime.Now.AddDays(-90);
             }
         }
 
