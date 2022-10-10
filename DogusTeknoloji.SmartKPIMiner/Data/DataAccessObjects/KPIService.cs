@@ -63,6 +63,13 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.DataAccessObjects
                 return DateTime.Now.AddDays(-90);
             }
         }
+        
+        public bool CheckIsSecure(long indexId){
+            using (var context = new SmartKPIDbContext(this._connectionString))
+            {
+                return context.KPIMetricTimers.FirstOrDefault(x => x.IndexId == indexId)?.IsSecure ?? false;
+            }
+        }
 
         public bool InsertOrUpdateMetricTimer(long indexId, DateTime logDate)
         {

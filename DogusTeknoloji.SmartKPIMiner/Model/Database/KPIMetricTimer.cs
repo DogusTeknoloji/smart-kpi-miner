@@ -20,5 +20,8 @@ namespace DogusTeknoloji.SmartKPIMiner.Model.Database
         public DateTime RowModifyDateLog { get; set; }
         [Column(TypeName = "datetime2")]
         public DateTime? LastInsertDate { get; set; }
+
+        [Column(TypeName = "bit")]
+        public bool IsSecure { get; set; }
     }
 }

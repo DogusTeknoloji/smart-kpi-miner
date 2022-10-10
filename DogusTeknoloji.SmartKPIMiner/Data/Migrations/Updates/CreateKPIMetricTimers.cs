@@ -22,7 +22,8 @@ namespace DogusTeknoloji.SmartKPIMiner.Data.Migrations.Updates
                                          .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     IndexId = table.Column<long>(nullable: false, type: "bigint"),
                     RowModifyDateLog = table.Column<DateTime>(nullable: true, type: "datetime2", defaultValueSql: "getdate()"),
-                    LastInsertDate = table.Column<DateTime>(nullable: false, type: "datetime2")
+                    LastInsertDate = table.Column<DateTime>(nullable: false, type: "datetime2"),
+                    IsSecure = table.Column<bool>(nullable:false, type: "bit", defaultValueSql: "0"),
                 },
                 constraints: tbl =>
                 {

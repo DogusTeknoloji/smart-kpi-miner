@@ -4,8 +4,10 @@ using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using DogusTeknoloji.SmartKPIMiner.Model.Auth;
 
 namespace DogusTeknoloji.SmartKPIMiner.Core
 {
@@ -17,14 +19,30 @@ namespace DogusTeknoloji.SmartKPIMiner.Core
             return result;
         }
 
-        public static async Task<Root> GetResponseFromElasticUrlAsync(string urlAddress, string port, string index, string requestBody)
+        public static async Task<Root> GetResponseFromElasticUrlWithAuthAsync(string urlAddress, string index,
+            string requestBody)
+        {
+            Root result = await GetResponseFromElasticUrlAsync(urlAddress, port: "443", index, requestBody, true);
+            return result;
+        }
+
+        public static async Task<Root> GetResponseFromElasticUrlAsync(string urlAddress, string port, string index,
+            string requestBody, bool isSecure = false)
         {
             if (string.IsNullOrEmpty(urlAddress)) { throw new ArgumentException("Url Address cannot be null or empty", nameof(urlAddress)); }
             if (string.IsNullOrEmpty(port)) { throw new ArgumentException("Port cannot be null or empty", nameof(port)); }
             if (string.IsNullOrEmpty(index)) { throw new ArgumentException("Index cannot be null or empty", nameof(index)); }
             if (string.IsNullOrEmpty(requestBody)) { throw new ArgumentException("Request Message cannot be null or empty", nameof(requestBody)); }
 
-            WebRequest request = WebRequest.Create($"http://{urlAddress}:{port}/{index}/_search?pretty");
+            WebRequest request;
+            if (!isSecure)
+              request = WebRequest.Create($"http://{urlAddress}:{port}/{index}/_search?pretty");
+            else
+            {
+                ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+                request = WebRequest.Create($"https://{ServiceManager._authModel.UserName}:{ServiceManager._authModel.Password}@{urlAddress}:{port}/{index}/_search?pretty");
+            }
+            
             request.Method = "POST";
             request.ContentType = "application/json";
             request.ContentLength = requestBody.Length;
@@ -105,4 +123,5 @@ namespace DogusTeknoloji.SmartKPIMiner.Core
             }
         }
     }
+   
 }

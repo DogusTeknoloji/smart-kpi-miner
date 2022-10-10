@@ -36,6 +36,8 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
             DateTime startDate = this._kpiService.GetSearchRange(searchIndex.IndexId); // Get last log insertion date 
             int fragmentCount = CalculateLoopCount(startDate); // Calculate fragment count
 
+            var isSecure = _kpiService.CheckIsSecure(searchIndex.IndexId);
+            
             DateTime searchRange = startDate;
 
             for (int i = 0; i < fragmentCount; i++)
@@ -44,7 +46,16 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
 
                 string requestBody = ElasticSearchRESTAdapter.GetRequestBody(start: searchRange);
                 string fullIndexName = ElasticSearchRESTAdapter.GetFullIndexName(index: searchIndex.IndexName, indexPattern: searchIndex.IndexPattern, indexPatternValue: searchRange);
-                Root responseRoot = await ElasticSearchRESTAdapter.GetResponseFromElasticUrlAsync(urlAddress: searchIndex.UrlAddress, index: fullIndexName, requestBody: requestBody);
+
+                Root responseRoot;
+                if (!isSecure)
+                {
+                     responseRoot = await ElasticSearchRESTAdapter.GetResponseFromElasticUrlAsync(urlAddress: searchIndex.UrlAddress, index: fullIndexName, requestBody: requestBody);
+                }
+                else
+                {
+                    responseRoot = await ElasticSearchRESTAdapter.GetResponseFromElasticUrlWithAuthAsync(urlAddress: searchIndex.UrlAddress, index: fullIndexName, requestBody: requestBody);
+                }
 
                 if (responseRoot == null)
                 {
