@@ -15,14 +15,14 @@ namespace DogusTeknoloji.SmartKPIMiner.Core
     {
         public static async Task<Root> GetResponseFromElasticUrlAsync(string urlAddress, string index, string requestBody)
         {
-            Root result = await GetResponseFromElasticUrlAsync(urlAddress, port: "9200", index, requestBody);
+            var result = await GetResponseFromElasticUrlAsync(urlAddress, port: "9200", index, requestBody);
             return result;
         }
 
         public static async Task<Root> GetResponseFromElasticUrlWithAuthAsync(string urlAddress, string index,
             string requestBody)
         {
-            Root result = await GetResponseFromElasticUrlAsync(urlAddress, port: "443", index, requestBody, true);
+            Root result = await GetResponseFromElasticUrlAsync(urlAddress, port: "9200", index, requestBody, true);
             return result;
         }
 
@@ -35,39 +35,37 @@ namespace DogusTeknoloji.SmartKPIMiner.Core
             if (string.IsNullOrEmpty(requestBody)) { throw new ArgumentException("Request Message cannot be null or empty", nameof(requestBody)); }
 
             WebRequest request;
+            
             if (!isSecure)
-              request = WebRequest.Create($"http://{urlAddress}:{port}/{index}/_search?pretty");
+                request = WebRequest.Create($"http://{urlAddress}:{port}/{index}/_search?pretty");
             else
-            {
-                ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-                request = WebRequest.Create($"https://{ServiceManager._authModel.UserName}:{ServiceManager._authModel.Password}@{urlAddress}:{port}/{index}/_search?pretty");
-            }
+                request = WebRequest.Create($"http://{ServiceManager._authModel.UserName}:{ServiceManager._authModel.Password}@{urlAddress}:{port}/{index}/_search?pretty");
             
             request.Method = "POST";
             request.ContentType = "application/json";
             request.ContentLength = requestBody.Length;
             request.Timeout = (int)TimeSpan.FromMinutes(3).TotalMilliseconds;
-
-            using (StreamWriter requestWriter = new StreamWriter(request.GetRequestStream(), Encoding.ASCII))
+            request.Credentials = new NetworkCredential(ServiceManager._authModel.UserName,ServiceManager._authModel.Password);
+            await using (var requestWriter = new StreamWriter(await request.GetRequestStreamAsync(), Encoding.ASCII))
             {
-                requestWriter.Write(requestBody);
+                await requestWriter.WriteAsync(requestBody);
             }
 
             HttpWebResponse response = null;
             try
             {
-                response = (HttpWebResponse)request.GetResponse();
+                response = (HttpWebResponse)await request.GetResponseAsync();
             }
             catch (WebException ex)
             {
                 return null;
             }
 
-            Stream incomingStream = response.GetResponseStream();
-            using (StreamReader responseReader = new StreamReader(incomingStream))
+            var incomingStream = response.GetResponseStream();
+            using (var responseReader = new StreamReader(incomingStream))
             {
-                string jsonResponse = await responseReader.ReadToEndAsync();
-                Root jsonData = JsonConvert.DeserializeObject<Root>(jsonResponse);
+                var jsonResponse = await responseReader.ReadToEndAsync();
+                var jsonData = JsonConvert.DeserializeObject<Root>(jsonResponse);
                 return jsonData;
             }
         }
@@ -98,23 +96,26 @@ namespace DogusTeknoloji.SmartKPIMiner.Core
 
             return result;
         }
-        public static string GetRequestBody(DateTime? start)
+        public static string GetRequestBody(DateTime? start, bool isNewTemplate = false)
         {
             if (start == null) return null;
 
             DateTime? end = start.Value.AddMinutes(CommonFunctions.UnifyingConstant);
-            string result = GetRequestBody(start, end);
+            string result = GetRequestBody(start, end, isNewTemplate);
+            
             return result;
         }
 
-        public static string GetRequestBody(DateTime? start, DateTime? end)
+        public static string GetRequestBody(DateTime? start, DateTime? end, bool isNewTemplate = false)
         {
             if (start == null || end == null || end < start) { return null; }
 
             long startMilliSec = CommonFunctions.GetCurrentUnixTimestampMillisec(start.Value);
             long endMilliSec = CommonFunctions.GetCurrentUnixTimestampMillisec(end.Value);
 
-            using (StreamReader dataStream = new StreamReader(CommonFunctions.AssemblyDirectory + "\\RequestJsonTemplate.txt"))
+            var template = !isNewTemplate ? "\\RequestJsonTemplate.txt" : "\\RequestJsonTemplate-New.txt";
+            
+            using (StreamReader dataStream = new StreamReader(CommonFunctions.AssemblyDirectory + template))
             {
                 string jsonBody = dataStream.ReadToEnd();
                 jsonBody = jsonBody.Replace("~@GreaterThanOrEqual@~", startMilliSec.ToString());

@@ -44,7 +44,8 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
             {
                 searchRange = searchRange.AddMinutes(CommonFunctions.UnifyingConstant); // add 15 min for each iteration.
 
-                string requestBody = ElasticSearchRESTAdapter.GetRequestBody(start: searchRange);
+                // if is secure, it is new elastic
+                string requestBody = ElasticSearchRESTAdapter.GetRequestBody(start: searchRange, isSecure);
                 string fullIndexName = ElasticSearchRESTAdapter.GetFullIndexName(index: searchIndex.IndexName, indexPattern: searchIndex.IndexPattern, indexPatternValue: searchRange);
 
                 Root responseRoot;
@@ -62,7 +63,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
                     // Root is null for current search range
                     // Check for next day of search range > today 
                     // Example: searchRange: 05.01.2020 -> 06.01.2020 > 10.01.2020 ?
-                    double checkForNextDay = (DateTime.Now - searchRange.AddDays(1)).TotalMilliseconds;
+                    double checkForNextDay = (DateTime.Now - searchRange.AddDays(1)).TotalMilliseconds; // 10.01.2020 - 06.01.2020 = 4 days
                     if (checkForNextDay < 0)
                     {
                         break; // it became greater than current date. 
@@ -72,6 +73,8 @@ namespace DogusTeknoloji.SmartKPIMiner.Agent
                     // then increase the current loop iterator for increment above to prevent out of range exception.
                     // 24 Hour * 60 Min / fragmentation by minute) - 1 for current iteration
                     i += (24 * 60 / CommonFunctions.UnifyingConstant) - 1;
+
+                    var x = responseRoot;
 
                     ConsoleLogging.LogLine($"{searchIndex.UrlAddress}-> {searchIndex.IndexName} is expired, skipped to [{i + 1}/{fragmentCount}].");
                     continue;

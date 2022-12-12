@@ -1,0 +1,84 @@
+﻿{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "~@GreaterThanOrEqual@~",
+              "lte": "~@LowerThanOrEqual@~",
+              "format": "epoch_millis"
+            }
+          }
+        },
+        {
+          "query_string": {
+            "analyze_wildcard": true,
+            "query": "*"
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "alldata": {
+      "terms": {
+        "field": "agent.hostname",
+        "size": 100,
+        "order": {
+          "_term": "desc"
+        },
+        "min_doc_count": 1
+      },
+      "aggs": {
+        "hostname": {
+          "terms": {
+            "field": "sitename",
+            "size": 1000,
+            "order": {
+              "_term": "desc"
+            },
+            "min_doc_count": 1
+          },
+          "aggs": {
+            "sitename": {
+              "terms": {
+                "field": "url.path",
+                "size": 2000,
+                "order": {
+                  "_term": "desc"
+                },
+                "min_doc_count": 1
+              },
+              "aggs": {
+                "urlname": {
+                  "terms": {
+                    "field": "http_response",
+                    "size": 10,
+                    "order": {
+                      "_term": "desc"
+                    },
+                    "min_doc_count": 1
+                  },
+                  "aggs": {
+                    "maxtime": {
+                      "max": {
+                        "field": "time_taken"
+                      }
+                    },
+                    "averagetime": {
+                      "avg": {
+                        "field": "time_taken"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
