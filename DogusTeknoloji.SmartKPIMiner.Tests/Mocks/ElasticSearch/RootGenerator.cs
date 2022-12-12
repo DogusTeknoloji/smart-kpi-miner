@@ -10,7 +10,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Tests.Mocks.ElasticSearch
             Root root = new Root
             {
                 Aggregation = AggregationGenerator.Generate(),
-                Hits = HitsGenerator.Generate(),
+                // Hits = HitsGenerator.Generate(),
                 IsTimedOut = false,
                 Took = RandomNumberGenerator.GetRandomInt(),
                 Shards = ShardsGenerator.Generate()
