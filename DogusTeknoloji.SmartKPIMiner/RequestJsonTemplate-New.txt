@@ -21,6 +21,7 @@
       ]
     }
   },
+  "terminate_after": 10000,
   "aggs": {
     "alldata": {
       "terms": {
