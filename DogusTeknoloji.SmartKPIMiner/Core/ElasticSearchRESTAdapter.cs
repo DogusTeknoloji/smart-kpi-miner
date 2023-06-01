@@ -22,7 +22,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Core
         public static async Task<Root> GetResponseFromElasticUrlWithAuthAsync(string urlAddress, string index,
             string requestBody)
         {
-            Root result = await GetResponseFromElasticUrlAsync(urlAddress, port: "9200", index, requestBody, true);
+            Root result = await GetResponseFromElasticUrlAsync(urlAddress, port: "443", index, requestBody, true);
             return result;
         }
 
@@ -39,7 +39,7 @@ namespace DogusTeknoloji.SmartKPIMiner.Core
             if (!isSecure)
                 request = WebRequest.Create($"http://{urlAddress}:{port}/{index}/_search?pretty");
             else
-                request = WebRequest.Create($"http://{ServiceManager._authModel.UserName}:{ServiceManager._authModel.Password}@{urlAddress}:{port}/{index}/_search?pretty");
+                request = WebRequest.Create($"https://{ServiceManager._authModel.UserName}:{ServiceManager._authModel.Password}@{urlAddress}/{index}/_search?pretty");
             
             request.Method = "POST";
             request.ContentType = "application/json";
